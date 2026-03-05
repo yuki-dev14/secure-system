@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "flatpickr": "^4.6.13",
+    "signature_pad": "^5.1.3",
+    "vue-chartjs": "^5.3.3",
+    "vue-flatpickr-component": "^12.0.0"
+  }
+}

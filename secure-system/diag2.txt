@@ -1,0 +1,29 @@
+=== QR DB RECORDS ===
+  ID=1 ben=1 valid=1 path=qr_codes/BIN-2024-00001.png
+  ID=2 ben=2 valid=1 path=qr_codes/BIN-2024-00002.png
+  ID=3 ben=3 valid=1 path=qr_codes/BIN-2024-00003.png
+  ID=4 ben=4 valid=1 path=qr_codes/BIN-2024-00004.png
+  ID=5 ben=5 valid=1 path=qr_codes/BIN-2024-00005.png
+
+=== BENEFICIARIES ===
+  ID=1 BIN=BIN-2024-00001 active=1 token=yGavXw739qUJuC7nzK3P...
+  ID=2 BIN=BIN-2024-00002 active=1 token=e6vKpBRJbH5ONsohpciQ...
+  ID=3 BIN=BIN-2024-00003 active=1 token=FHOqzJS6sKtOZ1uqf7RT...
+  ID=4 BIN=BIN-2024-00004 active=1 token=W3gXe17ez0fbRS8DjM4o...
+  ID=5 BIN=BIN-2024-00005 active=1 token=ibC8sHCm2FVDQ9O6NPyS...
+
+=== QR GENERATION TESTS ===
+  SVG: 1671 bytes — OK
+  PNG ERROR: BaconQrCode\Exception\RuntimeException: You need to install the imagick extension to use this back end
+  EPS: 2481 bytes — OK
+
+=== PHP EXTENSIONS ===
+  GD: YES
+  Imagick: NO
+  GD version: bundled (2.1.0 compatible)
+  PNG support: YES
+
+=== STORAGE ===
+  qr_codes disk files: 1
+  qr_codes root: C:\Users\Euclid\Desktop\CAPSTONE\secure-system\storage\app/public/qr_codes
+  qr_codes dir exists: YES
