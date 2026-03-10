@@ -9,9 +9,12 @@ use App\Http\Controllers\FamilyMemberController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QRCodeController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RequirementsController;
+use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\DistributionController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -312,6 +315,112 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/all',        [NotificationController::class, 'all'])         ->name('all');
         Route::post('/read-all',  [NotificationController::class, 'markAllAsRead'])->name('read-all');
         Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])  ->name('read');
+    });
+
+    // ── Cash Grant Distributions ──────────────────────────────────────────
+    Route::prefix('distribution')->name('distribution.')->group(function () {
+
+        // Inertia page — all authenticated
+        Route::get('/page', [DistributionController::class, 'page'])->name('page');
+
+        // Approval page — Compliance Verifier + Administrator
+        Route::middleware('role:Compliance Verifier,Administrator')
+             ->get('/approve-page/{beneficiaryId}', [DistributionController::class, 'approvalPage'])
+             ->name('approval-page');
+
+        // Approve for distribution — Compliance Verifier + Administrator, 30 req/min
+        Route::middleware(['role:Compliance Verifier,Administrator', 'throttle:30,1'])
+             ->post('/approve/{beneficiaryId}', [DistributionController::class, 'approveForDistribution'])
+             ->name('approve');
+
+        // Record distribution — Compliance Verifier + Administrator, 30 req/min
+        Route::middleware(['role:Compliance Verifier,Administrator', 'throttle:30,1'])
+             ->post('/record', [DistributionController::class, 'recordDistribution'])
+             ->name('record');
+
+        // Read endpoints — all authenticated, standard throttle
+        Route::middleware('throttle:60,1')->group(function () {
+            Route::get('/',                              [DistributionController::class, 'index'])    ->name('index');
+            Route::get('/history/{beneficiaryId}',      [DistributionController::class, 'history'])  ->name('history');
+            Route::get('/{id}',                         [DistributionController::class, 'show'])     ->name('show');
+            Route::get('/{id}/receipt',                 [DistributionController::class, 'downloadReceipt'])->name('receipt.download');
+        });
+
+        // Reconciliation — Administrator only
+        Route::middleware('role:Administrator')
+             ->post('/reconcile', [DistributionController::class, 'reconcile'])
+             ->name('reconcile');
+
+        // Bulk distribution — Administrator only
+        Route::middleware(['role:Administrator', 'throttle:10,1'])
+             ->post('/bulk', [DistributionController::class, 'bulkDistribute'])
+             ->name('bulk');
+
+        // Serve signature image securely
+        Route::get('/signature/{path}', [DistributionController::class, 'serveSignature'])
+             ->name('signature.serve')
+             ->where('path', '.+');
+    });
+
+    // ── Audit Logs (Administrator only) ──────────────────────────────────
+    Route::prefix('audit-logs')->name('audit.')->middleware('role:Administrator')->group(function () {
+
+        // Inertia page
+        Route::get('/page', [AuditLogController::class, 'page'])->name('page');
+
+        // JSON API endpoints
+        Route::middleware('throttle:60,1')->group(function () {
+            Route::get('/',                    [AuditLogController::class, 'index'])            ->name('index');
+            Route::get('/statistics',          [AuditLogController::class, 'statistics'])       ->name('statistics');
+            Route::get('/security-alerts',     [AuditLogController::class, 'securityAlerts'])   ->name('security-alerts');
+            Route::get('/privacy-report',      [AuditLogController::class, 'generatePrivacyComplianceReport'])->name('privacy-report');
+            Route::get('/{id}',                [AuditLogController::class, 'show'])             ->name('show');
+        });
+
+        Route::middleware('throttle:10,1')->group(function () {
+            Route::post('/export',             [AuditLogController::class, 'export'])           ->name('export');
+            Route::post('/{id}/acknowledge',   [AuditLogController::class, 'acknowledgeAlert'])->name('acknowledge');
+        });
+    });
+
+    // ── Reports & Analytics ───────────────────────────────────────
+    Route::prefix('reports')->name('reports.')->middleware('throttle:30,1')->group(function () {
+
+        // Dashboard — all authenticated
+        Route::get('/dashboard', [ReportController::class, 'dashboard'])->name('dashboard');
+
+        // Beneficiary Statistics — all authenticated
+        Route::post('/beneficiary-statistics', [ReportController::class, 'beneficiaryStatistics'])
+             ->name('beneficiary-statistics');
+
+        // Compliance Report — all authenticated
+        Route::post('/compliance', [ReportController::class, 'complianceReport'])
+             ->name('compliance');
+
+        // Distribution Report — Administrator, Compliance Verifier
+        Route::middleware('role:Administrator,Compliance Verifier')
+             ->post('/distribution', [ReportController::class, 'distributionReport'])
+             ->name('distribution');
+
+        // Fraud Detection Report — Administrator only
+        Route::middleware('role:Administrator')
+             ->post('/fraud-detection', [ReportController::class, 'fraudDetectionReport'])
+             ->name('fraud-detection');
+
+        // User Activity Report — Administrator only
+        Route::middleware('role:Administrator')
+             ->post('/user-activity', [ReportController::class, 'userActivityReport'])
+             ->name('user-activity');
+
+        // QR Code Report — Administrator, Field Officer
+        Route::middleware('role:Administrator,Field Officer')
+             ->post('/qr-code', [ReportController::class, 'qrCodeReport'])
+             ->name('qr-code');
+
+        // Export — all authenticated (controller gates per report type internally)
+        Route::post('/export/{type}', [ReportController::class, 'exportReport'])
+             ->name('export')
+             ->where('type', 'beneficiary|compliance|distribution|fraud|user|qr');
     });
 });
 

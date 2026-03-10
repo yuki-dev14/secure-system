@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\DataChangeTracker;
 use Illuminate\Database\Eloquent\Model;
 
 class ComplianceRecord extends Model
 {
+    use DataChangeTracker;
     protected $fillable = [
         'family_member_id',
         'compliance_type',

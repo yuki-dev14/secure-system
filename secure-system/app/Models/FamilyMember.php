@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\DataChangeTracker;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FamilyMember extends Model
 {
-    use HasFactory;
+    use HasFactory, DataChangeTracker;
 
     // No updated_at managed separately; migration has no timestamps() call
     // The migration actually has no timestamps, so we disable them.

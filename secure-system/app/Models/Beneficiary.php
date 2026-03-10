@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\DataChangeTracker;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Beneficiary extends Model
 {
-    use HasFactory;
+    use HasFactory, DataChangeTracker;
 
     protected $fillable = [
         'bin',
@@ -77,6 +78,16 @@ class Beneficiary extends Model
     public function complianceSummary()
     {
         return $this->hasOne(\App\Models\ComplianceSummaryCache::class);
+    }
+
+    public function distributions()
+    {
+        return $this->hasMany(\App\Models\CashGrantDistribution::class);
+    }
+
+    public function cashGrantDistributions()
+    {
+        return $this->hasMany(\App\Models\CashGrantDistribution::class);
     }
 
     /* ─── Scopes ──────────────────────────────────────────── */

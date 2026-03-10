@@ -19,7 +19,11 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
+        "apexcharts": "^5.10.3",
         "chart.js": "^4.5.1",
-        "jsqr": "^1.4.0"
+        "datatables.net-buttons": "^3.2.6",
+        "datatables.net-dt": "^2.3.7",
+        "jsqr": "^1.4.0",
+        "vue3-apexcharts": "^1.11.1"
     }
 }
